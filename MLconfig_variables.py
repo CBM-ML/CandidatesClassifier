@@ -77,7 +77,10 @@ def plot1Dcorrelation(vars_to_draw,var_to_corr, corr_signal, corr_signal_errors,
 
 def profile_plot_func(df,variable_xaxis, x_unit, variable_yaxis, sign, pdf_key, peak, edge_left, edge_right):
     """
-    Plots correlations
+    This function takes the entries of the variables and distributes them in 25 bins.
+    The function then plots the bin centers of the first variable on the x-axis and
+    the mean values of the bins of the second variable on the y-axis, along with its bin stds.
+    
     Parameters
     ------------------------------------------------
     df: pandas.DataFrame
