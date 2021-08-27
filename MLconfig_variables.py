@@ -75,7 +75,7 @@ def plot1Dcorrelation(vars_to_draw,var_to_corr, corr_signal, corr_signal_errors,
 
 
 
-def profile_plot_func(df,variable_xaxis, x_unit, variable_yaxis, sign, pdf_key, peak, edge_left, edge_right):
+def profile_mass(df,variable_xaxis, sign, peak, edge_left, edge_right, pdf_key):
     """
     This function takes the entries of the variables and distributes them in 25 bins.
     The function then plots the bin centers of the first variable on the x-axis and
@@ -87,7 +87,7 @@ def profile_plot_func(df,variable_xaxis, x_unit, variable_yaxis, sign, pdf_key, 
         input DataFrame
 
     variable_xaxis: str
-        variable to be plotted on x axis
+        variable to be plotted on x axis (invariant mass)
 
     x_unit: str
         x axis variable units
@@ -117,47 +117,49 @@ def profile_plot_func(df,variable_xaxis, x_unit, variable_yaxis, sign, pdf_key, 
         keyword = 'background'
 
     df = df[(df[variable_xaxis] < edge_right) & (df[variable_xaxis] > edge_left)]
-    unit = r'mass, $ \frac{GeV}{c^2}$'
+
+    for var in df.columns:
+        if var != variable_xaxis:
+
+            fig, axs = plt.subplots(figsize=(20, 15))
+
+            bin_means, bin_edges, binnumber = b_s(df[variable_xaxis],df[var], statistic='mean', bins=25)
+            bin_std, bin_edges, binnumber = b_s(df[variable_xaxis],df[var], statistic='std', bins=25)
+            bin_count, bin_edges, binnumber = b_s(df[variable_xaxis],df[var], statistic='count',bins= 25)
+            bin_width = (bin_edges[1] - bin_edges[0])
+            bin_centers = bin_edges[1:] - bin_width/2
+
+            nan_ind = np.where(np.isnan(bin_means))
+            bin_centers = np.delete(bin_centers, nan_ind)
+            bin_means = np.delete(bin_means, nan_ind)
+            bin_count = np.delete(bin_count, nan_ind)
+            bin_std = np.delete(bin_std , nan_ind)
 
 
-
-    fig, axs = plt.subplots(figsize=(20, 15))
-
-    bin_means, bin_edges, binnumber = b_s(df[variable_xaxis],df[variable_yaxis], statistic='mean', bins=25)
-    bin_std, bin_edges, binnumber = b_s(df[variable_xaxis],df[variable_yaxis], statistic='std', bins=25)
-    bin_count, bin_edges, binnumber = b_s(df[variable_xaxis],df[variable_yaxis], statistic='count',bins= 25)
-    bin_width = (bin_edges[1] - bin_edges[0])
-    bin_centers = bin_edges[1:] - bin_width/2
-
-    nan_ind = np.where(np.isnan(bin_means))
-    bin_centers = np.delete(bin_centers, nan_ind)
-    bin_means = np.delete(bin_means, nan_ind)
-    bin_count = np.delete(bin_count, nan_ind)
-    bin_std = np.delete(bin_std , nan_ind)
+            plt.errorbar(x=bin_centers, y=bin_means, yerr=(bin_std/np.sqrt(bin_count)), linestyle='none', marker='.',mfc='red', ms=10)
 
 
-    plt.errorbar(x=bin_centers, y=bin_means, yerr=(bin_std/np.sqrt(bin_count)), linestyle='none', marker='.',mfc='red', ms=10)
+            plt.rcParams['font.size'] = '25'
+            for label in(axs.get_xticklabels() + axs.get_yticklabels()):
+                label.set_fontsize(25)
 
 
-    plt.rcParams['font.size'] = '25'
-    for label in(axs.get_xticklabels() + axs.get_yticklabels()):
-        label.set_fontsize(25)
+            plt.title('Mean of ' +var+ ' plotted versus bin centers of '+variable_xaxis+ \
+                      '('+keyword+')', fontsize=25)
+            plt.xlabel('Mass', fontsize=25)
+            plt.ylabel("Mean of each bin with the SEM ($\dfrac{bin\ std}{\sqrt{bin\ count}}$) of bin", fontsize=25)
 
 
-    plt.title('Mean of ' +variable_yaxis+ ' plotted versus bin centers of '+variable_xaxis+ \
-              '('+keyword+')', fontsize=25)
-    plt.xlabel(x_unit, fontsize=25)
-    plt.ylabel("Mean of each bin with the SEM ($\dfrac{bin\ std}{\sqrt{bin\ count}}$) of bin", fontsize=25)
+            plt.vlines(x=peak,ymin=bin_means.min(),ymax=bin_means.max(), color='r', linestyle='-')
 
 
-    plt.vlines(x=peak,ymin=bin_means.min(),ymax=bin_means.max(), color='r', linestyle='-')
+            fig.tight_layout()
+            plt.savefig(pdf_key,format='pdf')
+
+    pdf_key.close()
 
 
-    fig.tight_layout()
-    plt.savefig(pdf_key,format='pdf')
-
-
-def plot2D(df, sample, sgn,x_axis_value, y_axis_value, range_x, range_y, pdf_key):
+def plot2D_all(df, sample, sgn, pdf_key):
     """
 
     Plots 2-D histogram.
@@ -170,34 +172,58 @@ def plot2D(df, sample, sgn,x_axis_value, y_axis_value, range_x, range_y, pdf_key
 
     """
 
-    fig, axs = plt.subplots(figsize=(15, 10))
-    cax = plt.hist2d(df[x_axis_value],df[y_axis_value],range=[range_x, range_y], bins=100,
-                norm=mpl.colors.LogNorm(), cmap=plt.cm.viridis)
+    for xvar in df.columns:
+        for yvar in df.columns:
+            if xvar!=yvar:
+                fig, axs = plt.subplots(figsize=(15, 10))
+                cax = plt.hist2d(df[xvar],df[yvar],range=[[df[xvar].min(), df[xvar].max()], [df[yvar].min(), df[yvar].max()]], bins=100,
+                            norm=mpl.colors.LogNorm(), cmap=plt.cm.viridis)
 
 
-    if x_axis_value=='mass':
-        unit = r' $, \frac{GeV}{c^2}$ '
-        plt.vlines(x=1.115683,ymin=range_y[0],ymax=range_y[1], color='r', linestyle='-')
+                if sgn==1:
+                    plt.title('Signal candidates ' + sample, fontsize = 25)
 
-    if x_axis_value=='pT':
-        unit = r' $, \frac{GeV}{c}$'
-
-
-    if sgn==1:
-        plt.title('Signal candidates ' + sample, fontsize = 25)
-
-    if sgn==0:
-        plt.title('Background candidates ' + sample, fontsize = 25)
+                if sgn==0:
+                    plt.title('Background candidates ' + sample, fontsize = 25)
 
 
-    plt.xlabel(x_axis_value+unit, fontsize=25)
-    plt.ylabel(y_axis_value, fontsize=25)
+                plt.xlabel(xvar, fontsize=25)
+                plt.ylabel(yvar, fontsize=25)
 
 
+                mpl.pyplot.colorbar()
 
-    mpl.pyplot.colorbar()
+                plt.legend(shadow=True,title =str(len(df))+ " samples")
 
-    plt.legend(shadow=True,title =str(len(df))+ " samples")
+                fig.tight_layout()
+                plt.savefig(pdf_key,format='pdf')
+    pdf_key.close()
 
-    fig.tight_layout()
-    plt.savefig(pdf_key,format='pdf')
+
+def plot2D_mass(df, sample, mass_var, mass_range, sgn, peak, pdf_key):
+    for var in df.columns:
+        if var != mass_var:
+            fig, axs = plt.subplots(figsize=(15, 10))
+            cax = plt.hist2d(df[mass_var],df[var],range=[mass_range, [df[var].min(), df[var].max()]], bins=100,
+                        norm=mpl.colors.LogNorm(), cmap=plt.cm.viridis)
+
+
+            if sgn==1:
+                plt.title('Signal candidates ' + sample, fontsize = 25)
+
+            if sgn==0:
+                plt.title('Background candidates ' + sample, fontsize = 25)
+
+
+            plt.xlabel(mass_var, fontsize=25)
+            plt.ylabel(var, fontsize=25)
+
+            plt.vlines(x=peak,ymin=df[var].min(),ymax=df[var].max(), color='r', linestyle='-')
+
+            mpl.pyplot.colorbar()
+
+            plt.legend(shadow=True,title =str(len(df))+ " samples")
+
+            fig.tight_layout()
+            plt.savefig(pdf_key,format='pdf')
+    pdf_key.close()
