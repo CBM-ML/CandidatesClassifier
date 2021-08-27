@@ -76,6 +76,37 @@ def plot1Dcorrelation(vars_to_draw,var_to_corr, corr_signal, corr_signal_errors,
 
 
 def profile_plot_func(df,variable_xaxis, x_unit, variable_yaxis, sign, pdf_key, peak, edge_left, edge_right):
+    """
+    Plots correlations
+    Parameters
+    ------------------------------------------------
+    df: pandas.DataFrame
+        input DataFrame
+
+    variable_xaxis: str
+        variable to be plotted on x axis
+
+    x_unit: str
+        x axis variable units
+
+    variable_yaxis: str
+        variable to be plotted on y axis
+
+    sign: int(0 or 1)
+        Defines signal or background
+
+    pdf_key: matplotlib.backends.backend_pdf.PdfPages
+        output pdf file
+
+    peak: int
+        invariant mass peak position
+
+    edge_left: int
+        left edge of x axis variable
+
+    edge_right: int
+        left edge of y axis variable
+    """
 
     if sign == 1:
         keyword = 'signal'
