@@ -75,20 +75,17 @@ def plot1Dcorrelation(vars_to_draw,var_to_corr, corr_signal, corr_signal_errors,
 
 
 
-def profile_plot_func(df,variable_xaxis,variable_yaxis, sign, pdf_key, peak, mass_left, mass_right):
+def profile_plot_func(df,variable_xaxis, x_unit, variable_yaxis, sign, pdf_key, peak, edge_left, edge_right):
 
     if sign == 1:
         keyword = 'signal'
     if sign == 0:
         keyword = 'background'
 
-    if variable_xaxis=='mass':
-        df = df[(df['mass'] < mass_right) & (df['mass'] > mass_left)]
-        unit = r'mass, $ \frac{GeV}{c^2}$'
+    df = df[(df[variable_xaxis] < edge_right) & (df[variable_xaxis] > edge_left)]
+    unit = r'mass, $ \frac{GeV}{c^2}$'
 
-    if variable_xaxis=='pT':
-        df = df[df['pT'] < 3]
-        unit = r'pT, $ \frac{GeV}{c}$'
+
 
     fig, axs = plt.subplots(figsize=(20, 15))
 
@@ -113,10 +110,9 @@ def profile_plot_func(df,variable_xaxis,variable_yaxis, sign, pdf_key, peak, mas
         label.set_fontsize(25)
 
 
-    # plt.legend(fontsize=25)
     plt.title('Mean of ' +variable_yaxis+ ' plotted versus bin centers of '+variable_xaxis+ \
               '('+keyword+')', fontsize=25)
-    plt.xlabel(unit, fontsize=25)
+    plt.xlabel(x_unit, fontsize=25)
     plt.ylabel("Mean of each bin with the SEM ($\dfrac{bin\ std}{\sqrt{bin\ count}}$) of bin", fontsize=25)
 
 
