@@ -6,8 +6,6 @@ from scipy.stats import sem
 from scipy.stats import binned_statistic as b_s
 import matplotlib as mpl
 
-
-
 def calculate_correlation(df, vars_to_corr, target_var) :
     """
     Calculates correlations with target variable variable and standart errors
@@ -95,8 +93,8 @@ def profile_mass(df,variable_xaxis, sign, peak, edge_left, edge_right, pdf_key):
     variable_yaxis: str
         variable to be plotted on y axis
 
-    sign: int(0 or 1)
-        Defines signal or background
+    sgn: int(0 or 1)
+         signal definition(0 background, 1 signal)
 
     pdf_key: matplotlib.backends.backend_pdf.PdfPages
         output pdf file
@@ -161,15 +159,20 @@ def profile_mass(df,variable_xaxis, sign, peak, edge_left, edge_right, pdf_key):
 
 def plot2D_all(df, sample, sgn, pdf_key):
     """
+    Plots 2D distribution between all the variables
+    Parameters
+    ------------------------------------------------
+    df: pandas.DataFrame
+        input dataframe
 
-    Plots 2-D histogram.
+    sample: str
+         title of the sample
 
-    x_axis_value: e.g. 'mass'
-    y_axis_value: e.g. 'distance'
-    range_x: e.g. [1, 1.177]
-    range_y: e.g [0, 100]
-    pdf_key: e.g. output PDF file
+    sgn: int(0 or 1)
+         signal definition(0 background, 1 signal)
 
+    pdf_key: matplotlib.backends.backend_pdf.PdfPages
+        output pdf file
     """
 
     for xvar in df.columns:
@@ -201,6 +204,33 @@ def plot2D_all(df, sample, sgn, pdf_key):
 
 
 def plot2D_mass(df, sample, mass_var, mass_range, sgn, peak, pdf_key):
+    """
+    Plots 2D distribution between variable and invariant mass
+    Parameters
+    ------------------------------------------------
+    df: pandas.DataFrame
+        input dataframe
+
+    sample: str
+         title of the sample
+
+
+    mass_var: str
+        name of the invariant mass variable
+
+    mass_range: list
+        mass range to be plotted
+
+    sgn: int(0 or 1)
+         signal definition(0 background, 1 signal)
+
+    peak: int
+        invariant mass value
+
+    pdf_key: matplotlib.backends.backend_pdf.PdfPages
+        output pdf file
+    """
+
     for var in df.columns:
         if var != mass_var:
             fig, axs = plt.subplots(figsize=(15, 10))
