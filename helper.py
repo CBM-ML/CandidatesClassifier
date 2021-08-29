@@ -32,7 +32,7 @@ def transform_df_to_log(df, vars, inp_file):
     return df_new
 
 
-def xgb_matr(x_train, y_train, x_test, y_test):
+def xgb_matr(x_train, y_train, x_test, y_test, cuts):
     """
     To make machine learning algorithms more efficient on unseen data we divide
     our data into two sets. One set is for training the algorithm and the other
@@ -46,7 +46,7 @@ def xgb_matr(x_train, y_train, x_test, y_test):
 
     """
 
-    dtrain = xgb.DMatrix(x_train, label = y_train)
-    dtest=xgb.DMatrix(x_test, label = y_test)
+    dtrain = xgb.DMatrix(x_train[cuts], label = y_train)
+    dtest=xgb.DMatrix(x_test[cuts], label = y_test)
 
     return dtrain, dtest
