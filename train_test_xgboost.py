@@ -7,6 +7,19 @@ from helper import *
 from sklearn.metrics import confusion_matrix, roc_curve, roc_auc_score
 
 
+from matplotlib.font_manager import FontProperties
+
+from matplotlib.ticker import (MultipleLocator, FormatStrFormatter,
+                               AutoMinorLocator)
+
+import gc
+import matplotlib as mpl
+
+
+
+mpl.rc('figure', max_open_warning = 0)
+
+
 class TrainTestXGBoost:
     def __init__(self, bst, dtrain, y_train, dtest, y_test, output_path):
 
@@ -87,7 +100,7 @@ class TrainTestXGBoost:
         fig, ax = plt.subplots(figsize=(12, 8))
         bins1=100
         plt.hist(df[preds], bins=bins1,facecolor='green',alpha = 0.3, label=label1)
-         
+
         TP = df[(df[true]==1)]
         TN = df[(df[true]==0)]
         #TP[preds].plot.hist(ax=ax, bins=bins1,facecolor='blue', histtype='stepfilled',alpha = 0.3, label='True Positives/signal in predictions')
