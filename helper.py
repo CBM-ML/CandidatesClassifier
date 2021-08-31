@@ -157,3 +157,14 @@ def preds_prob(df, preds, true, dataset, output_path):
     plt.show()
     fig.tight_layout()
     fig.savefig(str(output_path)+'/test_best_pred.png')
+
+
+def diff_SB(df, signal_label):
+    dfs = df[df[signal_label]==1]
+    dfb = df[df[signal_label]==0]
+
+    return dfs, dfb
+
+
+def difference_df(df_orig, df_cut, cut):
+    return pd.concat([df_orig[cut], df_cut[cut]]).drop_duplicates(keep=False)
