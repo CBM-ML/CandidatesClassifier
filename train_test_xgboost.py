@@ -53,6 +53,19 @@ class TrainTestXGBoost:
         return self.train_best, self.test_best
 
 
+    def get_result(self, x_train, x_test):
+
+        train_with_preds = x_train.copy()
+        train_with_preds['xgb_preds1'] = self.bst_train['xgb_preds1'].values
+
+
+        test_with_preds = x_test.copy()
+        test_with_preds['xgb_preds1'] = self.bst_test['xgb_preds1'].values
+
+        return train_with_preds, test_with_preds
+
+
+
     def features_importance(self):
         ax = xgb.plot_importance(self.bst)
         plt.rcParams['figure.figsize'] = [6, 3]
