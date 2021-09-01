@@ -33,6 +33,9 @@ class TrainTestXGBoost:
         self.bst_train = None
         self.bst_test = None
 
+        self.train_best = None
+        self.test_best = None
+
     def apply_predictions(self):
 
         self.bst_train= pd.DataFrame(data=self.bst.predict(self.dtrain, output_margin=False),  columns=["xgb_preds"])
@@ -43,6 +46,11 @@ class TrainTestXGBoost:
         self.bst_test['issignal']=self.y_test
 
         return self.bst_train, self.bst_test
+
+
+    def get_threshold(self, train_y, test_y):
+        self.train_best, self.test_best = AMS(train_y, self.bst_train['xgb_preds'], test_y, self.bst_test['xgb_preds'], self.output_path)
+        return self.train_best, self.test_best
 
 
     def features_importance(self):
@@ -186,10 +194,6 @@ class TrainTestXGBoost:
 
         mpl.pyplot.colorbar(im1, ax = axs[1])
 
-
-
-
-
         axs[1].xaxis.set_major_locator(MultipleLocator(1))
         axs[1].xaxis.set_major_formatter(FormatStrFormatter('%d'))
 
@@ -208,9 +212,6 @@ class TrainTestXGBoost:
         mpl.pyplot.colorbar(im1, ax = axs[2])
 
 
-
-
-
         axs[2].xaxis.set_major_locator(MultipleLocator(1))
         axs[2].xaxis.set_major_formatter(FormatStrFormatter('%d'))
 
@@ -219,3 +220,98 @@ class TrainTestXGBoost:
         fig.tight_layout()
 
         fig.savefig(self.output_path+'/pT_rapidity_'+s_label+'_ML_cut_'+data_name+'.png')
+
+
+
+    def hist_variables(self, mass_var, dfs_orig, dfb_orig, dfs_cut, dfb_cut, difference_s, sample, pdf_key):
+        """
+        Applied quality cuts and created distributions for all the features in pdf
+        file
+        Parameters
+        ----------
+        df_s: dataframe
+              signal
+        df_b: dataframe
+              background
+        feature: str
+                name of the feature to be plotted
+        pdf_key: PdfPages object
+                name of pdf document with distributions
+        """
+
+        for feature in dfs_orig.columns:
+            fig, ax = plt.subplots(3, figsize=(20, 10))
+
+
+            fontP = FontProperties()
+            fontP.set_size('xx-large')
+
+            ax[0].hist(dfs_orig[feature], label = 'signal', bins = 500, alpha = 0.4, color = 'blue')
+            ax[0].hist(dfb_orig[feature], label = 'background', bins = 500, alpha = 0.4, color = 'red')
+            ax[0].legend(shadow=True,title = 'S/B='+ str(round(len(dfs_orig)/len(dfb_orig), 3)) +
+
+                       '\n S samples:  '+str(dfs_orig.shape[0]) + '\n B samples: '+ str(dfb_orig.shape[0]) +
+                       '\nquality cuts ',
+                       title_fontsize=15, fontsize =15, bbox_to_anchor=(1.05, 1),
+                        loc='upper left', prop=fontP,)
+
+            ax[0].set_xlim(dfb_orig[feature].min(), dfb_orig[feature].max())
+
+            ax[0].xaxis.set_tick_params(labelsize=15)
+            ax[0].yaxis.set_tick_params(labelsize=15)
+
+            ax[0].set_title(str(feature) + ' MC '+ sample, fontsize = 25)
+            ax[0].set_xlabel(feature, fontsize = 25)
+
+            if feature!=mass_var:
+                ax[0].set_yscale('log')
+
+            fig.tight_layout()
+
+
+            ax[1].hist(dfs_cut[feature], label = 'signal', bins = 500, alpha = 0.4, color = 'blue')
+            ax[1].hist(dfb_cut[feature], label = 'background', bins = 500, alpha = 0.4, color = 'red')
+            ax[1].legend(shadow=True,title = 'S/B='+ str(round(len(dfs_cut)/len(dfb_cut), 3)) +
+                       '\n S samples:  '+str(dfs_cut.shape[0]) + '\n B samples: '+ str(dfb_cut.shape[0]) +
+                       '\nquality cuts + ML cut',
+                        title_fontsize=15, fontsize =15, bbox_to_anchor=(1.05, 1),
+                        loc='upper left', prop=fontP,)
+
+
+            ax[1].set_xlim(dfb_orig[feature].min(), dfb_orig[feature].max())
+
+            ax[1].xaxis.set_tick_params(labelsize=15)
+            ax[1].yaxis.set_tick_params(labelsize=15)
+
+            ax[1].set_title(feature + ' MC '+ sample, fontsize = 25)
+            ax[1].set_xlabel(feature, fontsize = 25)
+
+            if feature!='mass':
+                ax[1].set_yscale('log')
+
+            fig.tight_layout()
+
+
+
+
+            ax[2].hist(difference_s[feature], label = 'signal', bins = 500, alpha = 0.4, color = 'blue')
+            ax[2].legend(shadow=True,title ='S samples: '+str(len(difference_s)) +'\nsignal difference',
+                        title_fontsize=15, fontsize =15, bbox_to_anchor=(1.05, 1),
+                        loc='upper left', prop=fontP,)
+
+
+            ax[2].set_xlim(dfb_orig[feature].min(), dfb_orig[feature].max())
+
+            ax[2].xaxis.set_tick_params(labelsize=15)
+            ax[2].yaxis.set_tick_params(labelsize=15)
+
+            ax[2].set_title(feature + ' MC '+ sample, fontsize = 25)
+            ax[2].set_xlabel(feature, fontsize = 25)
+
+            if feature!='mass':
+                ax[2].set_yscale('log')
+
+            fig.tight_layout()
+
+            plt.savefig(pdf_key,format='pdf')
+        pdf_key.close()
