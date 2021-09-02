@@ -60,17 +60,30 @@ def xgb_matr(x_train, y_train, x_test, y_test, cuts):
 def AMS(y_true, y_predict, y_true1, y_predict1, output_path):
     roc_auc=roc_auc_score(y_true, y_predict)
     fpr, tpr, thresholds = roc_curve(y_true, y_predict,drop_intermediate=False ,pos_label=1)
+
+    for i in range(len(thresholds)):
+        if thresholds[i] > 1:
+            thresholds[i]-=1
+
     S0 = sqrt(2 * ((tpr + fpr) * log((1 + tpr/fpr)) - tpr))
     S0 = S0[~np.isnan(S0)]
+    S0 = S0[~np.isinf(S0)]
     xi = argmax(S0)
     S0_best_threshold = (thresholds[xi])
 
     roc_auc1=roc_auc_score(y_true1, y_predict1)
     fpr1, tpr1, thresholds1 = roc_curve(y_true1, y_predict1,drop_intermediate=False ,pos_label=1)
+
+    for i in range(len(thresholds1)):
+        if thresholds1[i] > 1:
+            thresholds1[i]-=1
+
     S01 = sqrt(2 * ((tpr1 + fpr1) * log((1 + tpr1/fpr1)) - tpr1))
     S01 = S01[~np.isnan(S01)]
+    S01 = S01[~np.isinf(S01)]
     xi1 = argmax(S01)
     S0_best_threshold1 = (thresholds[xi1])
+
 
     fig, ax = plt.subplots(figsize=(12, 8), dpi = 100)
     plt.plot(fpr, tpr, linewidth=3 ,linestyle=':',color='darkorange',label='ROC curve train (area = %0.6f)' % roc_auc)
@@ -168,3 +181,10 @@ def diff_SB(df, signal_label):
 
 def difference_df(df_orig, df_cut, cut):
     return pd.concat([df_orig[cut], df_cut[cut]]).drop_duplicates(keep=False)
+
+
+def diff_SB_cut(df, target_label):
+    dfs_cut = df[(df['xgb_preds1']==1) & (df[target_label]==1)]
+    dfb_cut = df[(df['xgb_preds1']==1) & (df[target_label]==0)]
+
+    return dfs_cut, dfb_cut
