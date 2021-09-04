@@ -11,7 +11,7 @@ import itertools
 
 
 
-def transform_df_to_log1(df, vars, inp_file):
+def transform_df_to_log(df, vars, inp_file):
     """
     Transforms DataFrame to DataFrame with features in log scale
     Parameters
