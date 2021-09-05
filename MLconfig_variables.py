@@ -137,10 +137,6 @@ def profile_mass(df,variable_xaxis, sign, peak, edge_left, edge_right, pdf_key):
             plt.errorbar(x=bin_centers, y=bin_means, yerr=(bin_std/np.sqrt(bin_count)), linestyle='none', marker='.',mfc='red', ms=10)
 
 
-            plt.rcParams['font.size'] = '25'
-            for label in(axs.get_xticklabels() + axs.get_yticklabels()):
-                label.set_fontsize(25)
-
 
             plt.title('Mean of ' +var+ ' plotted versus bin centers of '+variable_xaxis+ \
                       '('+keyword+')', fontsize=25)
