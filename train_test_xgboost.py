@@ -14,7 +14,9 @@ from matplotlib.ticker import (MultipleLocator, FormatStrFormatter,
 
 import gc
 import matplotlib as mpl
+import ROOT
 
+from array import array
 
 
 mpl.rc('figure', max_open_warning = 0)
@@ -64,6 +66,56 @@ class TrainTestXGBoost:
 
         self.__train_pred = None
         self.__test_pred = None
+
+        self.root_output_name = 'hists.root'
+
+        self.hist_out = ROOT.TFile(self.output_path+'/'+self.root_output_name, "UPDATE");
+
+
+        self.hist_out.cd()
+
+        ROOT.gDirectory.mkdir('Signal')
+        ROOT.gDirectory.mkdir('Background')
+
+        self.hist_out.cd()
+        self.hist_out.cd('Signal')
+
+
+        ROOT.gDirectory.mkdir('train')
+        ROOT.gDirectory.mkdir('test')
+
+        self.hist_out.cd()
+        ROOT.gDirectory.cd('Signal/train')
+        ROOT.gDirectory.mkdir('pt_rap')
+        ROOT.gDirectory.mkdir('roc')
+        ROOT.gDirectory.mkdir('hists')
+
+        self.hist_out.cd()
+        ROOT.gDirectory.cd('Signal/test')
+        ROOT.gDirectory.mkdir('pt_rap')
+        ROOT.gDirectory.mkdir('roc')
+        ROOT.gDirectory.mkdir('hists')
+
+
+        self.hist_out.cd()
+        self.hist_out.cd('Background')
+
+        ROOT.gDirectory.mkdir('train')
+        ROOT.gDirectory.mkdir('test')
+
+
+        self.hist_out.cd()
+        ROOT.gDirectory.cd('Background/train')
+        ROOT.gDirectory.mkdir('pt_rap')
+        ROOT.gDirectory.mkdir('roc')
+        ROOT.gDirectory.mkdir('hists')
+
+        self.hist_out.cd()
+        ROOT.gDirectory.cd('Background/test')
+        ROOT.gDirectory.mkdir('pt_rap')
+        ROOT.gDirectory.mkdir('roc')
+        ROOT.gDirectory.mkdir('hists')
+
 
     def apply_predictions(self):
 
@@ -271,6 +323,77 @@ class TrainTestXGBoost:
         fig.tight_layout()
 
         fig.savefig(self.output_path+'/pT_rapidity_'+s_label+'_ML_cut_'+data_name+'.png')
+
+
+        self.hist_out.cd()
+        ROOT.gDirectory.cd(s_label+'/'+data_name+'/'+'pt_rap')
+
+
+        rapidity_orig = array('d', df_orig['rapidity'].values.tolist())
+        pT_orig = array('d', df_orig['pT'].values.tolist())
+
+        pT_rap_before_cut = ROOT.TH2D( 'pT_rap_before_ML'+data_name, 'pT_rap_before_ML_'+data_name, 100, min(x_range),
+         max(x_range), 100, min(x_range), max(x_range))
+
+
+        for i in range(len(rapidity_orig)):
+            pT_rap_before_cut.Fill(rapidity_orig[i], pT_orig[i])
+
+        ROOT.gStyle.SetOptStat(0)
+
+
+        ROOT.gStyle.SetPalette(ROOT.kBird)
+
+        pT_rap_before_cut.Draw('COLZ')
+
+
+
+
+
+        rapidity_cut = array('d', df_cut['rapidity'].values.tolist())
+        pT_cut = array('d', df_cut['pT'].values.tolist())
+
+        pT_rap_cut = ROOT.TH2D( 'pT_rap_after_ML_'+data_name, 'pT_rap_after_ML_'+data_name, 100, min(x_range),
+         max(x_range), 100, min(x_range), max(x_range))
+
+
+        for i in range(len(rapidity_cut)):
+            pT_rap_cut.Fill(rapidity_cut[i], pT_cut[i])
+
+        ROOT.gStyle.SetOptStat(0)
+
+
+        ROOT.gStyle.SetPalette(ROOT.kBird)
+
+        pT_rap_cut.Draw('COLZ')
+
+
+
+
+
+        rapidity_diff = array('d', difference['rapidity'].values.tolist())
+        pT_diff = array('d', difference['pT'].values.tolist())
+
+        pT_rap_diff = ROOT.TH2D('pT_rap_diff_'+data_name, 'pT_rap_diff_'+data_name, 100, min(x_range),
+         max(x_range), 100, min(x_range), max(x_range))
+
+
+        for i in range(len(rapidity_diff)):
+            pT_rap_diff.Fill(rapidity_diff[i], pT_diff[i])
+
+        ROOT.gStyle.SetOptStat(0)
+
+
+        ROOT.gStyle.SetPalette(ROOT.kBird)
+
+        pT_rap_diff.Draw('COLZ')
+
+
+        pT_rap_before_cut.Write()
+        pT_rap_cut.Write()
+        pT_rap_diff.Write()
+
+        self.hist_out.Close()
 
 
 
