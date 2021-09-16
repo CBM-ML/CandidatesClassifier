@@ -69,52 +69,54 @@ class TrainTestXGBoost:
 
         self.root_output_name = 'hists.root'
 
-        self.hist_out = ROOT.TFile(self.output_path+'/'+self.root_output_name, "UPDATE");
+        hist_out = ROOT.TFile(self.output_path+'/'+self.root_output_name, "UPDATE");
 
 
-        self.hist_out.cd()
+        hist_out.cd()
 
         ROOT.gDirectory.mkdir('Signal')
         ROOT.gDirectory.mkdir('Background')
 
-        self.hist_out.cd()
-        self.hist_out.cd('Signal')
+        hist_out.cd()
+        hist_out.cd('Signal')
 
 
         ROOT.gDirectory.mkdir('train')
         ROOT.gDirectory.mkdir('test')
 
-        self.hist_out.cd()
+        hist_out.cd()
         ROOT.gDirectory.cd('Signal/train')
         ROOT.gDirectory.mkdir('pt_rap')
         ROOT.gDirectory.mkdir('roc')
         ROOT.gDirectory.mkdir('hists')
 
-        self.hist_out.cd()
+        hist_out.cd()
         ROOT.gDirectory.cd('Signal/test')
         ROOT.gDirectory.mkdir('pt_rap')
         ROOT.gDirectory.mkdir('roc')
         ROOT.gDirectory.mkdir('hists')
 
 
-        self.hist_out.cd()
-        self.hist_out.cd('Background')
+        hist_out.cd()
+        hist_out.cd('Background')
 
         ROOT.gDirectory.mkdir('train')
         ROOT.gDirectory.mkdir('test')
 
 
-        self.hist_out.cd()
+        hist_out.cd()
         ROOT.gDirectory.cd('Background/train')
         ROOT.gDirectory.mkdir('pt_rap')
         ROOT.gDirectory.mkdir('roc')
         ROOT.gDirectory.mkdir('hists')
 
-        self.hist_out.cd()
+        hist_out.cd()
         ROOT.gDirectory.cd('Background/test')
         ROOT.gDirectory.mkdir('pt_rap')
         ROOT.gDirectory.mkdir('roc')
         ROOT.gDirectory.mkdir('hists')
+
+        hist_out.Close()
 
 
     def apply_predictions(self):
@@ -325,7 +327,11 @@ class TrainTestXGBoost:
         fig.savefig(self.output_path+'/pT_rapidity_'+s_label+'_ML_cut_'+data_name+'.png')
 
 
-        self.hist_out.cd()
+
+
+        hist_out = ROOT.TFile(self.output_path+'/'+self.root_output_name, "UPDATE");
+
+        hist_out.cd()
         ROOT.gDirectory.cd(s_label+'/'+data_name+'/'+'pt_rap')
 
 
@@ -393,7 +399,7 @@ class TrainTestXGBoost:
         pT_rap_cut.Write()
         pT_rap_diff.Write()
 
-        self.hist_out.Close()
+        hist_out.Close()
 
 
 
