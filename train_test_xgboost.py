@@ -169,8 +169,10 @@ class TrainTestXGBoost:
         train_roc.SetLineStyle(9)
         test_roc.SetLineStyle(9)
 
-        train_roc.SetTitle("Receiver operating characteristic")
-        test_roc.SetTitle("Receiver operating characteristic")
+
+
+        train_roc.SetTitle("Receiver operating characteristic train")
+        test_roc.SetTitle("Receiver operating characteristic train")
 
         train_roc.Write()
         test_roc.Write()
