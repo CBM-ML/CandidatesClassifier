@@ -172,7 +172,7 @@ class TrainTestXGBoost:
 
 
         train_roc.SetTitle("Receiver operating characteristic train")
-        test_roc.SetTitle("Receiver operating characteristic train")
+        test_roc.SetTitle("Receiver operating characteristic test")
 
         train_roc.Write()
         test_roc.Write()
