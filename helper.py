@@ -104,7 +104,15 @@ def AMS(y_true, y_predict, y_true1, y_predict1, output_path):
     fig.tight_layout()
     fig.savefig(str(output_path)+'/hists.png')
     plt.show()
-    return S0_best_threshold, S0_best_threshold1
+
+    roc_curve_data = dict()
+    roc_curve_data["fpr_train"] = fpr
+    roc_curve_data["tpr_train"] = tpr
+
+    roc_curve_data["fpr_test"] = fpr1
+    roc_curve_data["tpr_test"] = tpr1
+
+    return S0_best_threshold, S0_best_threshold1, roc_curve_data
 
 
 def plot_confusion_matrix(cm, classes,

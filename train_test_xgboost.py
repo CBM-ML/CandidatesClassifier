@@ -87,13 +87,13 @@ class TrainTestXGBoost:
         hist_out.cd()
         ROOT.gDirectory.cd('Signal/train')
         ROOT.gDirectory.mkdir('pt_rap')
-        ROOT.gDirectory.mkdir('roc')
+        # ROOT.gDirectory.mkdir('roc')
         ROOT.gDirectory.mkdir('hists')
 
         hist_out.cd()
         ROOT.gDirectory.cd('Signal/test')
         ROOT.gDirectory.mkdir('pt_rap')
-        ROOT.gDirectory.mkdir('roc')
+        # ROOT.gDirectory.mkdir('roc')
         ROOT.gDirectory.mkdir('hists')
 
 
@@ -107,13 +107,13 @@ class TrainTestXGBoost:
         hist_out.cd()
         ROOT.gDirectory.cd('Background/train')
         ROOT.gDirectory.mkdir('pt_rap')
-        ROOT.gDirectory.mkdir('roc')
+        # ROOT.gDirectory.mkdir('roc')
         ROOT.gDirectory.mkdir('hists')
 
         hist_out.cd()
         ROOT.gDirectory.cd('Background/test')
         ROOT.gDirectory.mkdir('pt_rap')
-        ROOT.gDirectory.mkdir('roc')
+        # ROOT.gDirectory.mkdir('roc')
         ROOT.gDirectory.mkdir('hists')
 
         hist_out.Close()
@@ -132,7 +132,51 @@ class TrainTestXGBoost:
 
 
     def get_threshold(self, train_y, test_y):
-        self.__train_best_thr, self.__test_best_thr = AMS(train_y, self.__bst_train['xgb_preds'], test_y, self.__bst_test['xgb_preds'], self.output_path)
+        self.__train_best_thr, self.__test_best_thr, roc_curve_data = AMS(train_y,
+         self.__bst_train['xgb_preds'], test_y, self.__bst_test['xgb_preds'],
+         self.output_path)
+
+        hist_out = ROOT.TFile(self.output_path+'/'+self.root_output_name, "UPDATE");
+
+        hist_out.cd()
+
+        fpr = roc_curve_data['fpr_train']
+        tpr = roc_curve_data['tpr_train']
+
+
+        fpr1 = roc_curve_data['fpr_test']
+        tpr1 = roc_curve_data['tpr_test']
+
+
+        fpr_d_tr = array('d', fpr.tolist())
+        tpr_d_tr = array('d', tpr.tolist())
+
+        fpr_d_ts = array('d', fpr1.tolist())
+        tpr_d_ts = array('d', tpr1.tolist())
+
+
+        train_roc = ROOT.TGraph(len(fpr_d_tr), fpr_d_tr, tpr_d_tr)
+        test_roc = ROOT.TGraph(len(fpr_d_ts), fpr_d_ts, tpr_d_ts)
+
+        train_roc.SetLineColor(ROOT.kRed + 2)
+        test_roc.SetLineColor(ROOT.kBlue + 2)
+
+
+        train_roc.SetLineWidth(3)
+        test_roc.SetLineWidth(3)
+
+
+        train_roc.SetLineStyle(9)
+        test_roc.SetLineStyle(9)
+
+        train_roc.SetTitle("Receiver operating characteristic")
+        test_roc.SetTitle("Receiver operating characteristic")
+
+        train_roc.Write()
+        test_roc.Write()
+
+        hist_out.Close()
+
         return self.__train_best_thr, self.__test_best_thr
 
 
@@ -557,14 +601,6 @@ class TrainTestXGBoost:
 
             dfs_diff_root.Draw()
 
-
-            # dfs_orig_root.Write()
-            # dfb_orig_root.Write()
-            #
-            # dfs_cut_root.Write()
-            # dfb_cut_root.Write()
-            #
-            # dfs_diff_root.Write()
 
             hist_out.cd()
 
