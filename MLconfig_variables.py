@@ -6,6 +6,15 @@ from scipy.stats import sem
 from scipy.stats import binned_statistic as b_s
 import matplotlib as mpl
 
+from hipe4ml import plot_utils
+
+def correlation_matrix(bgr, sign, vars_to_draw, leg_labels, output_path):
+    res_s_b = plot_utils.plot_corr([bgr, sign], vars_to_draw, leg_labels)
+    res_s_b[0].savefig(output_path+'/'+'corr_matrix_bgr.png')
+    res_s_b[1].savefig(output_path+'/'+'corr_matrix_sign.png')
+    
+
+
 def calculate_correlation(df, vars_to_corr, target_var) :
     """
     Calculates correlations with target variable variable and standart errors
