@@ -419,6 +419,10 @@ class TrainTestXGBoost:
                 name of pdf document with distributions
         """
 
+        hist_out = ROOT.TFile(self.output_path+'/'+self.root_output_name, "UPDATE");
+        hist_out.cd()
+
+
         for feature in dfs_orig.columns:
             fig, ax = plt.subplots(3, figsize=(20, 10))
 
@@ -494,4 +498,88 @@ class TrainTestXGBoost:
             fig.tight_layout()
 
             plt.savefig(pdf_key,format='pdf')
+
+
+
+
+
+            dfs_orig_feat = array('d', dfs_orig[feature].values.tolist())
+            dfb_orig_feat = array('d', dfb_orig[feature].values.tolist())
+
+
+            dfs_cut_feat = array('d', dfs_cut[feature].values.tolist())
+            dfb_cut_feat = array('d', dfb_cut[feature].values.tolist())
+
+
+            dfs_diff_feat = array('d', difference_s[feature].values.tolist())
+
+
+            dfs_orig_root = ROOT.TH1D('signal before ML '+feature, 'signal before ML '+feature, 500,
+            min(dfs_orig[feature].values.tolist()), max(dfs_orig[feature].values.tolist()))
+
+            for i in range(len(dfs_orig_feat)):
+                dfs_orig_root.Fill(dfs_orig_feat[i])
+
+            dfs_orig_root.Draw()
+
+            dfb_orig_root = ROOT.TH1D('background before ML '+feature, 'background before ML '+feature, 500,
+            min(dfb_orig[feature].values.tolist()), max(dfb_orig[feature].values.tolist()))
+
+            for i in range(len(dfb_orig_feat)):
+                dfb_orig_root.Fill(dfb_orig_feat[i])
+
+            dfb_orig_root.Draw()
+
+
+            dfs_cut_root = ROOT.TH1D('signal after ML '+feature, 'signal after ML '+feature, 500,
+            min(dfs_cut[feature].values.tolist()), max(dfs_cut[feature].values.tolist()))
+
+            for i in range(len(dfs_cut_feat)):
+                dfs_cut_root.Fill(dfs_cut_feat[i])
+
+            dfs_cut_root.Draw()
+
+
+            dfb_cut_root = ROOT.TH1D('background after ML '+feature, 'background after ML '+feature, 500,
+            min(dfb_cut[feature].values.tolist()), max(dfb_cut[feature].values.tolist()))
+
+            for i in range(len(dfb_cut_feat)):
+                dfb_cut_root.Fill(dfb_cut_feat[i])
+
+            dfb_cut_root.Draw()
+
+
+            dfs_diff_root = ROOT.TH1D('signal difference '+feature, 'signal difference '+feature, 500,
+            min(difference_s[feature].values.tolist()), max(difference_s[feature].values.tolist()))
+
+            for i in range(len(dfs_diff_feat)):
+                dfs_diff_root.Fill(dfs_diff_feat[i])
+
+            dfs_diff_root.Draw()
+
+
+            # dfs_orig_root.Write()
+            # dfb_orig_root.Write()
+            #
+            # dfs_cut_root.Write()
+            # dfb_cut_root.Write()
+            #
+            # dfs_diff_root.Write()
+
+            hist_out.cd()
+
+            hist_out.cd('Signal'+'/'+sample+'/'+'hists')
+            dfs_orig_root.Write()
+            dfs_cut_root.Write()
+            dfs_diff_root.Write()
+
+            hist_out.cd()
+
+            hist_out.cd('Background'+'/'+sample+'/'+'hists')
+
+            dfb_orig_root.Write()
+            dfb_cut_root.Write()
+
+        hist_out.Close()
+
         pdf_key.close()
