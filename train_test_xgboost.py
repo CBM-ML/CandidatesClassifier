@@ -87,13 +87,11 @@ class TrainTestXGBoost:
         hist_out.cd()
         ROOT.gDirectory.cd('Signal/train')
         ROOT.gDirectory.mkdir('pt_rap')
-        # ROOT.gDirectory.mkdir('roc')
         ROOT.gDirectory.mkdir('hists')
 
         hist_out.cd()
         ROOT.gDirectory.cd('Signal/test')
         ROOT.gDirectory.mkdir('pt_rap')
-        # ROOT.gDirectory.mkdir('roc')
         ROOT.gDirectory.mkdir('hists')
 
 
@@ -107,13 +105,11 @@ class TrainTestXGBoost:
         hist_out.cd()
         ROOT.gDirectory.cd('Background/train')
         ROOT.gDirectory.mkdir('pt_rap')
-        # ROOT.gDirectory.mkdir('roc')
         ROOT.gDirectory.mkdir('hists')
 
         hist_out.cd()
         ROOT.gDirectory.cd('Background/test')
         ROOT.gDirectory.mkdir('pt_rap')
-        # ROOT.gDirectory.mkdir('roc')
         ROOT.gDirectory.mkdir('hists')
 
         hist_out.Close()
@@ -173,6 +169,12 @@ class TrainTestXGBoost:
 
         train_roc.SetTitle("Receiver operating characteristic train")
         test_roc.SetTitle("Receiver operating characteristic test")
+
+        train_roc.GetXaxis().SetTitle('FPR');
+        train_roc.GetYaxis().SetTitle('TPR');
+
+        test_roc.GetXaxis().SetTitle('FPR');
+        test_roc.GetYaxis().SetTitle('TPR');
 
         train_roc.Write()
         test_roc.Write()
@@ -291,6 +293,69 @@ class TrainTestXGBoost:
         fig.savefig(str(self.output_path)+'/test_best_pred.png')
 
 
+
+    # def preds_prob1(self, preds,true, preds1, true1):
+    #     fig, ax = plt.subplots(figsize=(12, 8))
+    #     bins1=100
+    #     TP = self.__bst_train[(self.__bst_train[true]==1)]
+    #     TN = self.__bst_train[(self.__bst_train[true]==0)]
+    #
+    #     plt.hist(TN[preds], density=True, bins=bins1,facecolor='red',alpha = 0.3, label='background in train')
+    #     plt.hist(TP[preds], density=True, bins=bins1,facecolor='blue',alpha = 0.3, label='signal in train')
+    #
+    #
+    #     TP1 = self.__bst_test[(self.__bst_test[true]==1)]
+    #     TN1 = self.__bst_test[(self.__bst_test[true]==0)]
+    #
+    #     scale = np.histogram(TN[preds], density = True, bins=bins1)[0] / np.histogram(TN[preds], density = False, bins=bins1)[0]
+    #
+    #     scale1 = np.histogram(TP[preds], density = True, bins=bins1)[0] / np.histogram(TP[preds], density = False, bins=bins1)[0]
+    #
+    #     hist, bins_train = np.histogram(TN[preds], density = False, bins=bins1)
+    #     err = np.sqrt(hist)
+    #     center = (bins_train[:-1] + bins_train[1:]) / 2
+    #     plt.errorbar(center, hist * scale, yerr=err*scale, fmt='o',
+    #     c='red', label='signal in test')
+    #
+    #     # plt.errorbar(center, hist, fmt='o',
+    #     # c='red', label='signal in test')
+    #
+    #     hist1, bins_test = np.histogram(TP1[preds1], density = False, bins=bins1)
+    #     err1 = np.sqrt(hist1)
+    #     center1 = (bins_test[:-1] + bins_test[1:]) / 2
+    #     plt.errorbar(center1, hist1 , yerr=err1, fmt='o',
+    #     c='blue', label='background in test')
+    #
+    #     # plt.errorbar(center, hist,fmt='o',
+    #     # c='blue', label='background in test')
+    #
+    #     #ax.annotate('cut on probability', xy=(0, 90), xycoords='data',xytext=(0.25,0.5), textcoords='axes fraction',
+    #     #fontsize=15,arrowprops=dict(facecolor='black', shrink=0.05),horizontalalignment='right', verticalalignment='top')
+    #
+    #     # if df[true].unique().shape[0]>2:
+    #     # TP2= df[df[true]>1]
+    #     # plt.hist(TP2[preds], bins=bins1,facecolor='green',alpha = 0.3, label='secondaries in train')
+    #     # TP2= df1[df1[true1]>1]
+    #     # hist2, bins2 = np.histogram(TP2[preds1], bins=bins1)
+    #     # center2 = (bins2[:-1] + bins2[1:]) / 2
+    #     # err2 = np.sqrt(hist2)
+    #     # plt.errorbar(center2, hist2,yerr=err2, fmt='o',c='green',label='secondaries in test')
+    #
+    #
+    #     ax.set_yscale('log')
+    #     ax.set_xlabel('Probability',fontsize=20)
+    #
+    #     ax.xaxis.set_tick_params(labelsize=15)
+    #     ax.yaxis.set_tick_params(labelsize=15)
+    #
+    #     plt.ylabel('Counts', fontsize=20)
+    #     #ax.set_xticks(np.arange(0,1.1,0.1))
+    #     plt.legend(fontsize=18)
+    #     plt.show()
+    #     fig.tight_layout()
+    #     fig.savefig(self.output_path+'/'+'Lambda_XGB_prediction_0.jpg')
+
+
     def pT_vs_rapidity(self, df_orig, df_cut, difference, sign, x_range, y_range, data_name):
         fig, axs = plt.subplots(1,3, figsize=(15, 4), gridspec_kw={'width_ratios': [1, 1, 1]})
 
@@ -308,12 +373,13 @@ class TrainTestXGBoost:
         axs[2].set_aspect(aspect = 'auto')
 
         rej = round((1 -  (df_cut.shape[0] / df_orig.shape[0])) * 100, 5)
+        saved = round((df_cut.shape[0] / df_orig.shape[0]) * 100, 5)
         diff = df_orig.shape[0] - df_cut.shape[0]
         axs[0].legend(shadow=True, title =str(len(df_orig))+' samples', fontsize =14)
         axs[1].legend(shadow=True, title =str(len(df_cut))+' samples', fontsize =14)
-        axs[2].legend(shadow=True, title ='ML cut rejects \n'+ str(rej) +'% of '+ s_label +
-        '\n ' + str(diff)+ ' samples were rejected ',
-         fontsize =14)
+        axs[2].legend(shadow=True, title ='ML cut saves \n'+ str(saved) +'% of '+ s_label, fontsize =14)
+         
+
 
         counts0, xedges0, yedges0, im0 = axs[0].hist2d(df_orig['rapidity'], df_orig['pT'] , range = [x_range, y_range], bins=100,
                     norm=mpl.colors.LogNorm(), cmap=plt.cm.rainbow)
@@ -396,6 +462,9 @@ class TrainTestXGBoost:
 
         ROOT.gStyle.SetPalette(ROOT.kBird)
 
+        pT_rap_before_cut.GetXaxis().SetTitle('rapidity');
+        pT_rap_before_cut.GetYaxis().SetTitle('pT, GeV');
+
         pT_rap_before_cut.Draw('COLZ')
 
 
@@ -417,6 +486,9 @@ class TrainTestXGBoost:
 
         ROOT.gStyle.SetPalette(ROOT.kBird)
 
+        pT_rap_cut.GetXaxis().SetTitle('rapidity');
+        pT_rap_cut.GetYaxis().SetTitle('pT, GeV');
+
         pT_rap_cut.Draw('COLZ')
 
 
@@ -437,6 +509,9 @@ class TrainTestXGBoost:
 
 
         ROOT.gStyle.SetPalette(ROOT.kBird)
+
+        pT_rap_diff.GetXaxis().SetTitle('rapidity');
+        pT_rap_diff.GetYaxis().SetTitle('pT, GeV');
 
         pT_rap_diff.Draw('COLZ')
 
@@ -490,7 +565,7 @@ class TrainTestXGBoost:
             ax[0].xaxis.set_tick_params(labelsize=15)
             ax[0].yaxis.set_tick_params(labelsize=15)
 
-            ax[0].set_title(str(feature) + ' MC '+ sample, fontsize = 25)
+            ax[0].set_title(str(feature) + ' MC '+ sample + ' before ML cut', fontsize = 25)
             ax[0].set_xlabel(feature, fontsize = 25)
 
             if feature!=mass_var:
@@ -513,7 +588,7 @@ class TrainTestXGBoost:
             ax[1].xaxis.set_tick_params(labelsize=15)
             ax[1].yaxis.set_tick_params(labelsize=15)
 
-            ax[1].set_title(feature + ' MC '+ sample, fontsize = 25)
+            ax[1].set_title(feature + ' MC '+ sample+ ' after ML cut', fontsize = 25)
             ax[1].set_xlabel(feature, fontsize = 25)
 
             if feature!='mass':
@@ -535,7 +610,7 @@ class TrainTestXGBoost:
             ax[2].xaxis.set_tick_params(labelsize=15)
             ax[2].yaxis.set_tick_params(labelsize=15)
 
-            ax[2].set_title(feature + ' MC '+ sample, fontsize = 25)
+            ax[2].set_title(feature + ' MC '+ sample +' signal difference', fontsize = 25)
             ax[2].set_xlabel(feature, fontsize = 25)
 
             if feature!=mass_var:
@@ -566,6 +641,8 @@ class TrainTestXGBoost:
             for i in range(len(dfs_orig_feat)):
                 dfs_orig_root.Fill(dfs_orig_feat[i])
 
+            dfs_orig_root.GetXaxis().SetTitle(feature);
+
             dfs_orig_root.Draw()
 
             dfb_orig_root = ROOT.TH1D('background before ML '+feature, 'background before ML '+feature, 500,
@@ -574,6 +651,7 @@ class TrainTestXGBoost:
             for i in range(len(dfb_orig_feat)):
                 dfb_orig_root.Fill(dfb_orig_feat[i])
 
+            dfb_orig_root.GetXaxis().SetTitle(feature);
             dfb_orig_root.Draw()
 
 
@@ -583,6 +661,7 @@ class TrainTestXGBoost:
             for i in range(len(dfs_cut_feat)):
                 dfs_cut_root.Fill(dfs_cut_feat[i])
 
+            dfs_cut_root.GetXaxis().SetTitle(feature);
             dfs_cut_root.Draw()
 
 
@@ -592,6 +671,7 @@ class TrainTestXGBoost:
             for i in range(len(dfb_cut_feat)):
                 dfb_cut_root.Fill(dfb_cut_feat[i])
 
+            dfb_cut_root.GetXaxis().SetTitle(feature);
             dfb_cut_root.Draw()
 
 
@@ -601,6 +681,7 @@ class TrainTestXGBoost:
             for i in range(len(dfs_diff_feat)):
                 dfs_diff_root.Fill(dfs_diff_feat[i])
 
+            dfs_diff_root.GetXaxis().SetTitle(feature);
             dfs_diff_root.Draw()
 
 
