@@ -12,7 +12,7 @@ def correlation_matrix(bgr, sign, vars_to_draw, leg_labels, output_path):
     res_s_b = plot_utils.plot_corr([bgr, sign], vars_to_draw, leg_labels)
     res_s_b[0].savefig(output_path+'/'+'corr_matrix_bgr.png')
     res_s_b[1].savefig(output_path+'/'+'corr_matrix_sign.png')
-    
+
 
 
 def calculate_correlation(df, vars_to_corr, target_var) :
@@ -72,11 +72,12 @@ def plot1Dcorrelation(vars_to_draw,var_to_corr, corr_signal, corr_signal_errors,
     plt.errorbar(vars_to_draw, corr_signal, yerr=corr_signal_errors, fmt='')
     plt.errorbar(vars_to_draw, corr_bg, yerr=corr_bg_errors, fmt='')
     ax.grid(zorder=0)
-    ax.set_xticklabels(vars_to_draw, fontsize=25, rotation =70)
-    ax.set_yticklabels([-0.5,-0.4,  -0.2,0, -0.2, 0.4], fontsize=25)
+    ax.set_xticklabels(vars_to_draw, fontsize=30, rotation =70)
+    # ax.set_yticklabels([-0.5,-0.4,  -0.2,0, -0.2, 0.4], fontsize=25)
+    ax.yaxis.set_tick_params(labelsize=30)
     plt.legend(('signal','background'), fontsize = 25)
-    plt.title('Correlation of all variables with '+ var_to_corr+' along with SEM', fontsize = 25)
-    plt.ylabel('Correlation coefficient', fontsize = 25)
+    plt.title('Correlation of all variables with '+ var_to_corr+' along with SEM', fontsize = 30)
+    plt.ylabel('Correlation coefficient', fontsize = 30)
     fig.tight_layout()
     fig.savefig(output_path+'/all_vars_corr-'+ var_to_corr+'.png')
 
@@ -155,7 +156,8 @@ def profile_mass(df,variable_xaxis, sign, peak, edge_left, edge_right, pdf_key):
 
             plt.vlines(x=peak,ymin=bin_means.min(),ymax=bin_means.max(), color='r', linestyle='-')
 
-
+            axs.xaxis.set_tick_params(labelsize=20)
+            axs.yaxis.set_tick_params(labelsize=20)
             fig.tight_layout()
             plt.savefig(pdf_key,format='pdf')
 
@@ -256,6 +258,11 @@ def plot2D_mass(df, sample, mass_var, mass_range, sgn, peak, pdf_key):
             plt.vlines(x=peak,ymin=df[var].min(),ymax=df[var].max(), color='r', linestyle='-')
 
             mpl.pyplot.colorbar()
+
+
+            axs.xaxis.set_tick_params(labelsize=20)
+            axs.yaxis.set_tick_params(labelsize=20)
+
 
             plt.legend(shadow=True,title =str(len(df))+ " samples")
 
