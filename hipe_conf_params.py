@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 from hipe4ml import plot_utils
 
 import xgboost as xgb
-import treelite
 
 
 @dataclass
@@ -52,25 +51,8 @@ class XGBmodel():
         self.__model_hdl.load_model_handler(filename)
 
 
-    # add this part to apply preds
-    def save_model_lib(self):
-        bst = self.__model_hdl.model.get_booster()
-
-        #create an object out of your model, bst in our case
-        model = treelite.Model.from_xgboost(bst)
-        #use GCC compiler
-        toolchain = 'gcc'
-        #parallel_comp can be changed upto as many processors as one have
-        model.export_lib(toolchain=toolchain, libpath=self.output_path+'/xgb_model.so',
-                         params={'parallel_comp': 4}, verbose=True)
-
-
-        # Operating system of the target machine
-        platform = 'unix'
-        model.export_srcpkg(platform=platform, toolchain=toolchain,
-                    pkgpath=self.output_path+'/XGBmodel.zip', libname='xgb_model.so',
-                    verbose=True)
-
+    def get_mode_booster(self):
+        return self.__model_hdl.model
 
 
     def plot_dists(self):
