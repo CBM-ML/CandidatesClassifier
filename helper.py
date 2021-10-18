@@ -200,7 +200,7 @@ def diff_SB_cut(df, target_label):
     return dfs_cut, dfb_cut
 
 
-# add this part to apply preds
+
 def save_model_lib(bst_model, output_path):
     bst = bst_model.get_booster()
 
