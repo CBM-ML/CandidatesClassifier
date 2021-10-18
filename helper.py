@@ -8,7 +8,7 @@ import xgboost as xgb
 from sklearn.metrics import confusion_matrix, roc_curve, roc_auc_score
 from numpy import sqrt, log, argmax
 import itertools
-
+import treelite
 
 
 def transform_df_to_log(df, vars, inp_file):
@@ -198,3 +198,23 @@ def diff_SB_cut(df, target_label):
     dfb_cut = df[(df['xgb_preds1']==1) & (df[target_label]==0)]
 
     return dfs_cut, dfb_cut
+
+
+# add this part to apply preds
+def save_model_lib(bst_model, output_path):
+    bst = bst_model.get_booster()
+
+    #create an object out of your model, bst in our case
+    model = treelite.Model.from_xgboost(bst)
+    #use GCC compiler
+    toolchain = 'gcc'
+    #parallel_comp can be changed upto as many processors as one have
+    model.export_lib(toolchain=toolchain, libpath=output_path+'/xgb_model.so',
+                     params={'parallel_comp': 4}, verbose=True)
+
+
+    # Operating system of the target machine
+    platform = 'unix'
+    model.export_srcpkg(platform=platform, toolchain=toolchain,
+                pkgpath=output_path+'/XGBmodel.zip', libname='xgb_model.so',
+                verbose=True)
