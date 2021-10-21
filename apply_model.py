@@ -149,8 +149,8 @@ class ApplyXGB:
         test_roc.GetXaxis().SetTitle('FPR');
         test_roc.GetYaxis().SetTitle('TPR');
 
-        train_roc.Write()
-        test_roc.Write()
+        train_roc.Write("Train_roc")
+        test_roc.Write("Test_roc")
 
         __hist_out.Close()
 
