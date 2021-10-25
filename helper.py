@@ -2,13 +2,14 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from read_configs import *
+from config_reader import *
 
 import xgboost as xgb
 from sklearn.metrics import confusion_matrix, roc_curve, roc_auc_score
 from numpy import sqrt, log, argmax
 import itertools
 import treelite
+
 
 
 def transform_df_to_log(df, vars, inp_file):
