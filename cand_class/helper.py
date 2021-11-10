@@ -2,8 +2,6 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from config_reader import *
-
 import xgboost as xgb
 from sklearn.metrics import confusion_matrix, roc_curve, roc_auc_score
 from numpy import sqrt, log, argmax
@@ -12,7 +10,7 @@ import treelite
 
 
 
-def transform_df_to_log(df, vars, inp_file):
+def transform_df_to_log(df, vars, non_log_x, log_x):
     """
     Transforms DataFrame to DataFrame with features in log scale
     Parameters
@@ -26,8 +24,6 @@ def transform_df_to_log(df, vars, inp_file):
         transformed to log scale
     """
     df_new = pd.DataFrame()
-
-    non_log_x, log_x = read_log_vars(inp_file)
 
 
 
