@@ -6,3 +6,5 @@ scikit-learn
 xgboost
 bayesian-optimization
 hipe4ml
+treelite
+treelite_runtime
