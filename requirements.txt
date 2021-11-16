@@ -1,5 +1,4 @@
 uproot
-matplotlib
 pandas
 numpy
 scikit-learn
