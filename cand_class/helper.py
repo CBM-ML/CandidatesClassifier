@@ -9,7 +9,6 @@ import itertools
 import treelite
 
 
-
 def transform_df_to_log(df, vars, non_log_x, log_x):
     """
     Transforms DataFrame to DataFrame with features in log scale
@@ -84,17 +83,17 @@ def AMS(y_true, y_predict, y_true1, y_predict1, output_path):
     S0_best_threshold1 = (thresholds[xi1])
 
 
-    fig, ax = plt.subplots(figsize=(12, 8), dpi = 100)
+    fig, ax = plt.subplots(figsize=(5, 4), dpi = 100)
     plt.plot(fpr, tpr, linewidth=3 ,linestyle=':',color='darkorange',label='ROC curve train (area = %0.6f)' % roc_auc)
     plt.plot(fpr1, tpr1, color='green',label='ROC curve test (area = %0.6f)' % roc_auc1)
     plt.plot([0, 1], [0, 1], color='navy', linestyle='--', label='Random guess')
     #plt.scatter(fpr[xi], tpr[xi], marker='o', color='black', label= 'Best Threshold train set = '+"%.4f" % S0_best_threshold +'\n AMS = '+ "%.2f" % S0[xi])
     plt.scatter(fpr1[xi1], tpr1[xi1], marker='o', s=80, color='blue', label= 'Best Threshold test set = '+"%.4f" % S0_best_threshold1 +'\n AMS = '+ "%.2f" % S01[xi1])
-    plt.xlabel('False Positive Rate', fontsize = 18)
-    plt.ylabel('True Positive Rate', fontsize = 18)
-    plt.legend(loc="lower right", fontsize = 18)
-    plt.title('Receiver operating characteristic', fontsize = 18)
-    ax.tick_params(axis='both', which='major', labelsize=18)
+    plt.xlabel('False Positive Rate', fontsize = 10)
+    plt.ylabel('True Positive Rate', fontsize = 10)
+    plt.legend(loc="lower right", fontsize = 8)
+    plt.title('Receiver operating characteristic', fontsize = 13)
+    ax.tick_params(axis='both', which='major', labelsize=10)
     plt.xlim([-0.01, 1.0])
     plt.ylim([0, 1.02])
     #axs.axis([-0.01, 1, 0.9, 1])
@@ -124,8 +123,11 @@ def plot_confusion_matrix(cm, classes,
 
     print(cm)
 
+    # plt.subplots(figsize=(12, 9))
+    # plt.figure(figsize = (6, 5))
     plt.imshow(cm, interpolation='nearest', cmap=cmap)
-    plt.title(title)
+
+    plt.title(title, fontsize = 20)
     plt.colorbar()
     tick_marks = np.arange(len(classes))
     plt.xticks(tick_marks, classes, rotation=45)
@@ -136,7 +138,7 @@ def plot_confusion_matrix(cm, classes,
     for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
         plt.text(j, i, format(cm[i, j], fmt),
                  horizontalalignment="center",
-                 color="white" if cm[i, j] > thresh else "black")
+                 color="white" if cm[i, j] > thresh else "black", size = 15)
 
     plt.tight_layout()
     plt.ylabel('True label',fontsize = 15)
@@ -191,7 +193,7 @@ def difference_df(df_orig, df_cut, cut):
 
 
 def diff_SB_cut(df, target_label):
-    dfs_cut = df[(df['xgb_preds1']==1) & (df[target_label]==1)]
+    dfs_cut = df[(df['xgb_preds1']==1)]
     dfb_cut = df[(df['xgb_preds1']==1) & (df[target_label]==0)]
 
     return dfs_cut, dfb_cut
