@@ -15,13 +15,16 @@ from matplotlib.ticker import (MultipleLocator, FormatStrFormatter,
 
 import gc
 import matplotlib as mpl
-
+from cand_class.helper import *
 
 mpl.rc('figure', max_open_warning = 0)
 
 
 @dataclass
 class ApplyXGB:
+
+    x_train : pd.core.frame.DataFrame
+    x_test : pd.core.frame.DataFrame
 
     y_pred_train : np.ndarray
     y_pred_test : np.ndarray
@@ -31,61 +34,37 @@ class ApplyXGB:
 
     output_path : str
 
+    __train_res = pd.DataFrame()
+    __test_res = pd.DataFrame()
 
-    __bst_train : pd = pd.DataFrame()
-    __bst_test : pd = pd.DataFrame()
-
-    __train_best_thr : int = 0
-    __test_best_thr : int = 0
-
-    def apply_predictions(self):
-
-        self.__bst_train["xgb_preds"] = self.y_pred_train
-        self.__bst_train['issignal'] = self.y_train
+    __best_train_thr : int = 0
+    __best_test_thr : int = 0
 
 
-        self.__bst_test["xgb_preds"] = self.y_pred_test
-        self.__bst_test['issignal'] = self.y_test
 
-        return self.__bst_train, self.__bst_test
+    def get_predictions(self):
+        self.__best_train_thr, self.__best_test_thr, roc_curve_data = AMS(self.y_train, self.y_pred_train,
+         self.y_test, self.y_pred_test, self.output_path)
 
+        train_pred = ((self.y_pred_train > self.__best_train_thr)*1)
+        test_pred = ((self.y_pred_test > self.__best_test_thr)*1)
 
-    def get_threshold(self):
+        self.__train_res = self.x_train.copy()
+        self.__train_res['xgb_preds1'] = train_pred
 
-        self.__train_best_thr, self.__test_best_thr, roc_curve_data = AMS(self.y_train,
-         self.__bst_train['xgb_preds'], self.y_test, self.__bst_test['xgb_preds'],
-          self.output_path)
+        self.__test_res = self.x_test.copy()
+        self.__test_res['xgb_preds1'] = test_pred
 
-
-        return self.__train_best_thr, self.__test_best_thr
-
-
-    def apply_threshold(self):
-        cut_train = self.__train_best_thr
-        self.__train_pred = ((self.__bst_train['xgb_preds']>cut_train)*1)
-
-        cut_test = self.__test_best_thr
-        self.__test_pred = ((self.__bst_test['xgb_preds']>cut_test)*1)
-
-        return self.__train_pred, self.__test_pred
-
-
-    def get_result(self, x_train, x_test):
-
-        train_with_preds = x_train.copy()
-        train_with_preds['xgb_preds1'] = self.__train_pred.values
-
-
-        test_with_preds = x_test.copy()
-        test_with_preds['xgb_preds1'] = self.__test_pred.values
-
-        return train_with_preds, test_with_preds
+        return self.__train_res, self.__test_res
 
 
     def features_importance(self, bst):
         # this one needs to be tested
         ax = xgb.plot_importance(bst)
         plt.rcParams['figure.figsize'] = [6, 3]
+        plt.rcParams['font.size'] = 15
+        ax.xaxis.set_tick_params(labelsize=13)
+        ax.yaxis.set_tick_params(labelsize=13)
         ax.figure.tight_layout()
         ax.figure.savefig(str(self.output_path)+"/xgb_train_variables_rank.png")
 
@@ -110,23 +89,31 @@ class ApplyXGB:
          """
          #lets take the best threshold and look at the confusion matrix
 
-         cnf_matrix_train = confusion_matrix(self.__bst_train['issignal'], self.__train_pred, labels=[1,0])
+         cnf_matrix_train = confusion_matrix(self.__train_res['issignal'], self.__train_res['xgb_preds1'], labels=[1,0])
          np.set_printoptions(precision=2)
-         fig_train, axs_train = plt.subplots(figsize=(10, 8))
+         fig_train, axs_train = plt.subplots(figsize=(8, 6))
          axs_train.yaxis.set_label_coords(-0.04,.5)
          axs_train.xaxis.set_label_coords(0.5,-.005)
+
+         axs_train.xaxis.set_tick_params(labelsize=15)
+         axs_train.yaxis.set_tick_params(labelsize=15)
+
          plot_confusion_matrix(cnf_matrix_train, classes=['signal','background'],
-          title=' Train Dataset Confusion Matrix for XGB for cut > '+str(self.__train_best_thr))
+          title=' Train Dataset Confusion Matrix for cut > '+"%.4f"%self.__best_train_thr)
          plt.savefig(str(self.output_path)+'/confusion_matrix_extreme_gradient_boosting_train.png')
 
 
-         cnf_matrix_test = confusion_matrix(self.__bst_test['issignal'], self.__test_pred, labels=[1,0])
+         cnf_matrix_test = confusion_matrix(self.__test_res['issignal'], self.__test_res['xgb_preds1'], labels=[1,0])
          np.set_printoptions(precision=2)
-         fig_test, axs_test = plt.subplots(figsize=(10, 8))
+         fig_test, axs_test = plt.subplots(figsize=(8, 6))
          axs_test.yaxis.set_label_coords(-0.04,.5)
          axs_test.xaxis.set_label_coords(0.5,-.005)
+
+         axs_test.xaxis.set_tick_params(labelsize=15)
+         axs_test.yaxis.set_tick_params(labelsize=15)
+
          plot_confusion_matrix(cnf_matrix_test, classes=['signal','background'],
-           title=' Test Dataset Confusion Matrix for XGB for cut > '+str(self.__test_best_thr))
+           title=' Test Dataset Confusion Matrix for cut > '+"%.4f"%self.__best_test_thr)
          plt.savefig(str(self.output_path)+'/confusion_matrix_extreme_gradient_boosting_test.png')
 
 
