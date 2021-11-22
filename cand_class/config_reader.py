@@ -43,7 +43,7 @@ def read_log_vars(inp_file):
     with open(str(inp_file), encoding="utf-8") as inp_file:
         inp_dict = tomli.load(inp_file)
 
-    return inp_dict['log_scale']['variables'], inp_dict['log_scale']['variables']
+    return inp_dict['non_log_scale']['variables'], inp_dict['log_scale']['variables']
 
 
 
