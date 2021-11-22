@@ -67,16 +67,16 @@ def plot1Dcorrelation(vars_to_draw,var_to_corr, corr_signal, corr_signal_errors,
           path that contains output plot
     """
 
-    fig, ax = plt.subplots(figsize=(20,10))
-    plt.errorbar(vars_to_draw, corr_signal, yerr=corr_signal_errors, fmt='')
-    plt.errorbar(vars_to_draw, corr_bg, yerr=corr_bg_errors, fmt='')
+    fig, ax = plt.subplots(figsize=(10,6))
+    plt.errorbar(vars_to_draw, corr_signal, yerr=corr_signal_errors, fmt='--o')
+    plt.errorbar(vars_to_draw, corr_bg, yerr=corr_bg_errors, fmt='--o')
     ax.grid(zorder=0)
-    ax.set_xticklabels(vars_to_draw, fontsize=30, rotation =70)
+    ax.set_xticklabels(vars_to_draw, fontsize=15, rotation =70)
     # ax.set_yticklabels([-0.5,-0.4,  -0.2,0, -0.2, 0.4], fontsize=25)
-    ax.yaxis.set_tick_params(labelsize=30)
-    plt.legend(('signal','background'), fontsize = 25)
-    plt.title('Correlation of all variables with '+ var_to_corr+' along with SEM', fontsize = 30)
-    plt.ylabel('Correlation coefficient', fontsize = 30)
+    ax.yaxis.set_tick_params(labelsize=15)
+    plt.legend(('signal','background'), fontsize = 15)
+    plt.title('Correlation of all variables with '+ var_to_corr+' along with SEM', fontsize = 18)
+    plt.ylabel('Correlation coefficient', fontsize = 15)
     fig.tight_layout()
     fig.savefig(output_path+'/all_vars_corr-'+ var_to_corr+'.png')
 
@@ -119,7 +119,7 @@ def profile_mass(df,variable_xaxis, sign, peak, edge_left, edge_right, pdf_key):
     for var in df.columns:
         if var != variable_xaxis:
 
-            fig, axs = plt.subplots(figsize=(20, 15))
+            fig, axs = plt.subplots(figsize=(10, 6))
 
             bin_means, bin_edges, binnumber = b_s(df[variable_xaxis],df[var], statistic='mean', bins=25)
             bin_std, bin_edges, binnumber = b_s(df[variable_xaxis],df[var], statistic='std', bins=25)
@@ -134,20 +134,21 @@ def profile_mass(df,variable_xaxis, sign, peak, edge_left, edge_right, pdf_key):
             bin_std = np.delete(bin_std , nan_ind)
 
 
-            plt.errorbar(x=bin_centers, y=bin_means, yerr=(bin_std/np.sqrt(bin_count)), linestyle='none', marker='.',mfc='red', ms=10)
+            plt.errorbar(x=bin_centers, y=bin_means, yerr=(bin_std/np.sqrt(bin_count)), linestyle='none', linewidth = 2, marker='.',mfc='red', ms=15)
+
+            plt.locator_params(axis='y', nbins=5)
+            plt.locator_params(axis='x', nbins=5)
+
+            plt.title('Mean of ' +var+ '  vs bin centers of '+variable_xaxis+ \
+                      '('+keyword+')', fontsize=19)
+            plt.xlabel('Mass', fontsize=17)
+            plt.ylabel(" SEM ($\dfrac{bin\ std}{\sqrt{bin\ count}}$) of bin", fontsize=17)
 
 
+            plt.vlines(x=peak,ymin=bin_means.min(),ymax=bin_means.max(), color='r', linestyle='-', linewidth = 3)
 
-            plt.title('Mean of ' +var+ ' plotted versus bin centers of '+variable_xaxis+ \
-                      '('+keyword+')', fontsize=25)
-            plt.xlabel('Mass', fontsize=25)
-            plt.ylabel("Mean of each bin with the SEM ($\dfrac{bin\ std}{\sqrt{bin\ count}}$) of bin", fontsize=25)
-
-
-            plt.vlines(x=peak,ymin=bin_means.min(),ymax=bin_means.max(), color='r', linestyle='-')
-
-            axs.xaxis.set_tick_params(labelsize=20)
-            axs.yaxis.set_tick_params(labelsize=20)
+            axs.xaxis.set_tick_params(labelsize=16)
+            axs.yaxis.set_tick_params(labelsize=16)
             fig.tight_layout()
             plt.savefig(pdf_key,format='pdf')
 
@@ -220,28 +221,31 @@ def plot2D_mass(df, sample, mass_var, mass_range, sgn, peak, pdf_key):
 
     for var in df.columns:
         if var != mass_var:
-            fig, axs = plt.subplots(figsize=(15, 10))
+            fig, axs = plt.subplots(figsize=(6, 4))
             cax = plt.hist2d(df[mass_var],df[var],range=[mass_range, [df[var].min(), df[var].max()]], bins=100,
                         norm=mpl.colors.LogNorm(), cmap=plt.cm.viridis)
 
 
             if sgn==1:
-                plt.title('Signal candidates ' + sample, fontsize = 25)
+                plt.title('Signal candidates ' + sample, fontsize = 15)
 
             if sgn==0:
-                plt.title('Background candidates ' + sample, fontsize = 25)
+                plt.title('Background candidates ' + sample, fontsize = 15)
 
 
-            plt.xlabel(mass_var, fontsize=25)
-            plt.ylabel(var, fontsize=25)
+            plt.xlabel(mass_var, fontsize=16)
+            plt.ylabel(var, fontsize=16)
 
-            plt.vlines(x=peak,ymin=df[var].min(),ymax=df[var].max(), color='r', linestyle='-')
+            plt.vlines(x=peak,ymin=df[var].min(),ymax=df[var].max(), color='r', linestyle='-', linewidth = 4)
 
             mpl.pyplot.colorbar()
 
 
-            axs.xaxis.set_tick_params(labelsize=20)
-            axs.yaxis.set_tick_params(labelsize=20)
+            axs.xaxis.set_tick_params(labelsize=11)
+            axs.yaxis.set_tick_params(labelsize=11)
+
+            plt.locator_params(axis='y', nbins=5)
+            plt.locator_params(axis='x', nbins=5)
 
 
             plt.legend(shadow=True,title =str(len(df))+ " samples")
