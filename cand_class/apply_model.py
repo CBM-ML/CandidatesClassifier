@@ -202,8 +202,7 @@ class ApplyXGB:
 
 
 
-
-    def hist_variables(self, mass_var, dfs_orig, dfb_orig, dfs_cut, dfb_cut, difference_s, sample, pdf_key):
+    def hist_variables(self, mass_var, df, sign_label, pred_label,  sample, pdf_key):
         """
         Applied quality cuts and created distributions for all the features in pdf
         file
@@ -219,10 +218,20 @@ class ApplyXGB:
                 name of pdf document with distributions
         """
 
+        dfs_orig = df[df[sign_label]==1]
+        dfb_orig = df[df[sign_label]==0]
+
+        dfs_cut = df[(df[sign_label]==1) & (df[pred_label]==1)]
+        dfb_cut = df[(df[sign_label]==0) & (df[pred_label]==1)]
+
+        diff_vars = dfs_orig.columns.drop([sign_label, pred_label])
+
+        difference_s = pd.concat([dfs_orig[diff_vars], dfs_cut[diff_vars]]).drop_duplicates(keep=False)
 
 
-        for feature in dfs_orig.columns:
-            fig, ax = plt.subplots(3, figsize=(20, 10))
+
+        for feature in diff_vars:
+            fig, ax = plt.subplots(3, figsize=(15, 10))
 
 
             fontP = FontProperties()
@@ -251,9 +260,17 @@ class ApplyXGB:
             fig.tight_layout()
 
 
+            if len(dfb_cut) !=0:
+                s_b_cut = round(len(dfs_cut)/len(dfb_cut), 3)
+                title1 = 'S/B='+ str(s_b_cut)
+            else:
+                title1 = 'S = '+str(len(dfs_cut)) + ' all bgr was cut'
+
+
+
             ax[1].hist(dfs_cut[feature], label = 'signal', bins = 500, alpha = 0.4, color = 'blue')
             ax[1].hist(dfb_cut[feature], label = 'background', bins = 500, alpha = 0.4, color = 'red')
-            ax[1].legend(shadow=True,title = 'S/B='+ str(round(len(dfs_cut)/len(dfb_cut), 3)) +
+            ax[1].legend(shadow=True,title =  title1 +
                        '\n S samples:  '+str(dfs_cut.shape[0]) + '\n B samples: '+ str(dfb_cut.shape[0]) +
                        '\nquality cuts + ML cut',
                         title_fontsize=15, fontsize =15, bbox_to_anchor=(1.05, 1),
