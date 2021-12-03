@@ -117,18 +117,18 @@ class ApplyXGB:
          plt.savefig(str(self.output_path)+'/confusion_matrix_extreme_gradient_boosting_test.png')
 
 
-
-    def pT_vs_rapidity(self, df_orig, df_cut, difference, sign, x_range, y_range, data_name):
+    def pT_vs_rapidity(self, df, sign_label, pred_label, x_range, y_range, data_name):
         fig, axs = plt.subplots(1,3, figsize=(15, 4), gridspec_kw={'width_ratios': [1, 1, 1]})
 
+        df_orig = df[df[sign_label]==1]
 
-        if sign ==0:
-            s_label = 'Background'
-            m = 5
+        df_cut = df[df[pred_label]==1]
 
-        if sign==1:
-            s_label = 'Signal'
-            m = 1
+        diff_vars = ['pT', 'rapidity']
+
+        difference = pd.concat([df_orig[diff_vars], df_cut[diff_vars]]).drop_duplicates(keep=False)
+
+        s_label = 'Signal '
 
         axs[0].set_aspect(aspect = 'auto')
         axs[1].set_aspect(aspect = 'auto')
