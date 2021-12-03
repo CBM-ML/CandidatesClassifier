@@ -22,15 +22,12 @@ def transform_df_to_log(df, vars, non_log_x, log_x):
         config TOML file with list of features that should and shouldn't be
         transformed to log scale
     """
-    df_new = pd.DataFrame()
-
-
+    df_new = df.copy()
 
     for var in vars:
         if var in log_x:
-            df_new['log('+ var+')'] = np.log(df[var])
-        if var in non_log_x:
-            df_new[var] = df[var]
+            df_new[var]  = df_new[var].apply(np.log)
+            df_new = df_new.rename(columns={var: 'log('+ var+')'})
     return df_new
 
 
