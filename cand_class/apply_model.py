@@ -67,11 +67,22 @@ class ApplyXGB:
 
 
 
-    def get_predictions(self):
+    def get_predictions(self, ams, train_thr, test_thr):
         """
+        Makes XGBoost predictions
+
+        Returns
+        -------
+
+        Train and test dataframes with predictions
         """
-        self.__best_train_thr, self.__best_test_thr, roc_curve_data = AMS(self.y_train, self.y_pred_train,
-         self.y_test, self.y_pred_test, self.output_path)
+        if ams==1:
+            self.__best_train_thr, self.__best_test_thr, roc_curve_data = AMS(self.y_train, self.y_pred_train,
+             self.y_test, self.y_pred_test, self.output_path)
+
+        if ams==0 and train_thr!=0 and test_thr!=0:
+            self.__best_train_thr = train_thr
+            self.__best_test_thr = test_thr
 
         train_pred = ((self.y_pred_train > self.__best_train_thr)*1)
         test_pred = ((self.y_pred_test > self.__best_test_thr)*1)
