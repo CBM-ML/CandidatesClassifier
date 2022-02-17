@@ -22,6 +22,31 @@ mpl.rc('figure', max_open_warning = 0)
 
 @dataclass
 class ApplyXGB:
+    """
+    A class used to apply XGBoost predictions on the data
+
+    ...
+
+    Attributes
+    ----------
+    x_train : pd.core.frame.DataFrame
+        train dataframe
+    x_test : pd.core.frame.DataFrame
+        test dataframe
+    y_pred_train : np.ndarray
+        array with XGBoost predictions for train dataset
+    y_pred_test : np.ndarray
+        array with XGBoost predictions for test dataset
+    output_path : str
+        output path for plots
+
+    Methods
+    -------
+    get_predictions()
+        Returns train and test dataframes with predictions
+    features_importance(bst)
+
+    """
 
     x_train : pd.core.frame.DataFrame
     x_test : pd.core.frame.DataFrame
@@ -43,6 +68,8 @@ class ApplyXGB:
 
 
     def get_predictions(self):
+        """
+        """
         self.__best_train_thr, self.__best_test_thr, roc_curve_data = AMS(self.y_train, self.y_pred_train,
          self.y_test, self.y_pred_test, self.output_path)
 
@@ -59,17 +86,6 @@ class ApplyXGB:
 
 
     def features_importance(self, bst):
-        # this one needs to be tested
-        ax = xgb.plot_importance(bst)
-        plt.rcParams['figure.figsize'] = [6, 3]
-        plt.rcParams['font.size'] = 15
-        ax.xaxis.set_tick_params(labelsize=13)
-        ax.yaxis.set_tick_params(labelsize=13)
-        ax.figure.tight_layout()
-        ax.figure.savefig(str(self.output_path)+"/xgb_train_variables_rank.png")
-
-
-    def CM_plot_train_test(self):
          """
          Plots confusion matrix. A Confusion Matrix C is such that Cij is equal to
          the number of observations known to be in group i and predicted to be in
@@ -81,15 +97,47 @@ class ApplyXGB:
 
          Parameters
          ----------
-         test_best: numpy.float32
-                   best threshold
+         bst: xgboost.sklearn.XGBClassifier
+               model's XGB classifier
 
-         x_train: dataframe
-                 we want to get confusion matrix on training datasets
+         Returns
+         -------
+
+             Saves plot with XGB features imporance
+
          """
-         #lets take the best threshold and look at the confusion matrix
+         ax = xgb.plot_importance(bst)
+         plt.rcParams['figure.figsize'] = [6, 3]
+         plt.rcParams['font.size'] = 15
+         ax.xaxis.set_tick_params(labelsize=13)
+         ax.yaxis.set_tick_params(labelsize=13)
+         ax.figure.tight_layout()
+         ax.figure.savefig(str(self.output_path)+"/xgb_train_variables_rank.png")
 
-         cnf_matrix_train = confusion_matrix(self.__train_res['issignal'], self.__train_res['xgb_preds1'], labels=[1,0])
+
+    def CM_plot_train_test(self, issignal):
+         """
+         Plots confusion matrix. A Confusion Matrix C is such that Cij is equal to
+         the number of observations known to be in group i and predicted to be in
+         group j. Thus in binary classification, the count of true positives is C00,
+         false negatives C01,false positives is C10, and true neagtives is C11.
+
+         Confusion matrix is applied to previously unseen by model data, so we can
+         estimate model's performance
+
+         Parameters
+         ----------
+         issignal: str
+                   signal label
+
+         Returns
+         -------
+
+             Saves plot with confusion matrix
+
+         """
+
+         cnf_matrix_train = confusion_matrix(self.__train_res[issignal], self.__train_res['xgb_preds1'], labels=[1,0])
          np.set_printoptions(precision=2)
          fig_train, axs_train = plt.subplots(figsize=(8, 6))
          axs_train.yaxis.set_label_coords(-0.04,.5)
@@ -103,7 +151,7 @@ class ApplyXGB:
          plt.savefig(str(self.output_path)+'/confusion_matrix_extreme_gradient_boosting_train.png')
 
 
-         cnf_matrix_test = confusion_matrix(self.__test_res['issignal'], self.__test_res['xgb_preds1'], labels=[1,0])
+         cnf_matrix_test = confusion_matrix(self.__test_res[issignal], self.__test_res['xgb_preds1'], labels=[1,0])
          np.set_printoptions(precision=2)
          fig_test, axs_test = plt.subplots(figsize=(8, 6))
          axs_test.yaxis.set_label_coords(-0.04,.5)
@@ -117,14 +165,40 @@ class ApplyXGB:
          plt.savefig(str(self.output_path)+'/confusion_matrix_extreme_gradient_boosting_test.png')
 
 
-    def pT_vs_rapidity(self, df, sign_label, pred_label, x_range, y_range, data_name):
+    def pT_vs_rapidity(self, df, sign_label, pred_label, x_range, y_range, data_name, pt_rap):
+        """
+        Plots distribution in pT-rapidity phase space
+
+        Parameters
+        ----------
+        df: pd.DataFrame
+            dataframe with XGBoost predictions
+        sign_label: str
+             dataframe column that srecifies if the sample is signal or not
+        pred_label: str
+             dataframe column with XGBoost prediction
+        x_range: list
+                rapidity range
+        y_range: list
+                 pT range
+        data_name: str
+                name of the dataset (for example, train or test)
+        pt_rap: list
+                 list with pt and rapidity labels(for example ['pt', 'rapid'])
+
+        Returns
+        -------
+
+            Saves istribution in pT-rapidity phase space
+
+        """
         fig, axs = plt.subplots(1,3, figsize=(15, 4), gridspec_kw={'width_ratios': [1, 1, 1]})
 
         df_orig = df[df[sign_label]==1]
 
         df_cut = df[df[pred_label]==1]
 
-        diff_vars = ['pT', 'rapidity']
+        diff_vars = pt_rap
 
         difference = pd.concat([df_orig[diff_vars], df_cut[diff_vars]]).drop_duplicates(keep=False)
 
@@ -143,7 +217,7 @@ class ApplyXGB:
 
 
 
-        counts0, xedges0, yedges0, im0 = axs[0].hist2d(df_orig['rapidity'], df_orig['pT'] , range = [x_range, y_range], bins=100,
+        counts0, xedges0, yedges0, im0 = axs[0].hist2d(df_orig[pt_rap[1]], df_orig[pt_rap[0]] , range = [x_range, y_range], bins=100,
                     norm=mpl.colors.LogNorm(), cmap=plt.cm.rainbow)
 
         axs[0].set_title(s_label + ' candidates before ML cut '+data_name, fontsize = 16)
@@ -164,7 +238,7 @@ class ApplyXGB:
         fig.tight_layout()
 
 
-        counts1, xedges1, yedges1, im1 = axs[1].hist2d(df_cut['rapidity'], df_cut['pT'] , range = [x_range, y_range], bins=100,
+        counts1, xedges1, yedges1, im1 = axs[1].hist2d(df_cut[pt_rap[1]], df_cut[pt_rap[0]] , range = [x_range, y_range], bins=100,
                     norm=mpl.colors.LogNorm(), cmap=plt.cm.rainbow)
 
         axs[1].set_title(s_label + ' candidates after ML cut '+data_name, fontsize = 16)
@@ -181,7 +255,7 @@ class ApplyXGB:
         fig.tight_layout()
 
 
-        counts2, xedges2, yedges2, im2 = axs[2].hist2d(difference['rapidity'], difference['pT'] , range = [x_range, y_range], bins=100,
+        counts2, xedges2, yedges2, im2 = axs[2].hist2d(difference[pt_rap[1]], difference[pt_rap[0]] , range = [x_range, y_range], bins=100,
                     norm=mpl.colors.LogNorm(), cmap=plt.cm.rainbow)
 
         axs[2].set_title(s_label + ' difference ', fontsize = 16)
