@@ -16,6 +16,7 @@ from matplotlib.ticker import (MultipleLocator, FormatStrFormatter,
 import gc
 import matplotlib as mpl
 from cand_class.helper import *
+from hipe4ml import plot_utils
 
 mpl.rc('figure', max_open_warning = 0)
 
@@ -66,35 +67,6 @@ class ApplyXGB:
     __best_test_thr : int = 0
 
 
-
-    # def get_predictions(self, ams, train_thr, test_thr):
-    #     """
-    #     Makes XGBoost predictions
-    #
-    #     Returns
-    #     -------
-    #
-    #     Train and test dataframes with predictions
-    #     """
-    #     if ams==1:
-    #         self.__best_train_thr, self.__best_test_thr, roc_curve_data = AMS(self.y_train, self.y_pred_train,
-    #          self.y_test, self.y_pred_test, self.output_path)
-    #
-    #     if ams==0 and train_thr!=0 and test_thr!=0:
-    #         self.__best_train_thr = train_thr
-    #         self.__best_test_thr = test_thr
-    #
-    #     train_pred = ((self.y_pred_train > self.__best_train_thr)*1)
-    #     test_pred = ((self.y_pred_test > self.__best_test_thr)*1)
-    #
-    #     self.__train_res = self.x_train.copy()
-    #     self.__train_res['xgb_preds1'] = train_pred
-    #
-    #     self.__test_res = self.x_test.copy()
-    #     self.__test_res['xgb_preds1'] = test_pred
-    #
-    #     return self.__train_res, self.__test_res
-
     def get_predictions(self):
         """
         Makes XGB predictions
@@ -139,6 +111,13 @@ class ApplyXGB:
         self.__test_res['xgb_preds1'] = test_pred
 
         return self.__train_res, self.__test_res
+
+
+    def print_roc(self):
+        plot_utils.plot_roc_train_test(self.y_test, self.__test_res['xgb_preds1'],
+        self.y_train, self.__train_res['xgb_preds1'], None, ['background', 'signal'])
+        plt.savefig(str(self.output_path)+'/roc_curve.png')
+
 
 
 
