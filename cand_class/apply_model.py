@@ -67,15 +67,61 @@ class ApplyXGB:
 
 
 
-    def get_predictions(self, ams, train_thr, test_thr):
+    # def get_predictions(self, ams, train_thr, test_thr):
+    #     """
+    #     Makes XGBoost predictions
+    #
+    #     Returns
+    #     -------
+    #
+    #     Train and test dataframes with predictions
+    #     """
+    #     if ams==1:
+    #         self.__best_train_thr, self.__best_test_thr, roc_curve_data = AMS(self.y_train, self.y_pred_train,
+    #          self.y_test, self.y_pred_test, self.output_path)
+    #
+    #     if ams==0 and train_thr!=0 and test_thr!=0:
+    #         self.__best_train_thr = train_thr
+    #         self.__best_test_thr = test_thr
+    #
+    #     train_pred = ((self.y_pred_train > self.__best_train_thr)*1)
+    #     test_pred = ((self.y_pred_test > self.__best_test_thr)*1)
+    #
+    #     self.__train_res = self.x_train.copy()
+    #     self.__train_res['xgb_preds1'] = train_pred
+    #
+    #     self.__test_res = self.x_test.copy()
+    #     self.__test_res['xgb_preds1'] = test_pred
+    #
+    #     return self.__train_res, self.__test_res
+
+    def get_predictions(self):
         """
-        Makes XGBoost predictions
+        Makes XGB predictions
 
         Returns
-        -------
+        --------
 
         Train and test dataframes with predictions
         """
+        self.__train_res = self.x_train.copy()
+        self.__train_res['xgb_preds'] = self.y_pred_train
+
+        self.__test_res = self.x_test.copy()
+        self.__test_res['xgb_preds'] = self.y_pred_test
+
+        return self.__train_res, self.__test_res
+
+
+    def apply_prob_cut(self, ams, train_thr, test_thr):
+        """
+        Applies BDT cut on XGB probabilities and returns 'xgb_preds1' ==1 if
+        sample's prediction > BDT threshold, otherwise 'xgb_preds1' ==0
+        If ams==1 BDT cut is computed with respect to AMS metrics optimization
+        If ams==0 and train_thr!=0 and test_thr!=0, one should specify
+        thresholds for test and train datasets manually
+        """
+
         if ams==1:
             self.__best_train_thr, self.__best_test_thr, roc_curve_data = AMS(self.y_train, self.y_pred_train,
              self.y_test, self.y_pred_test, self.output_path)
@@ -87,13 +133,13 @@ class ApplyXGB:
         train_pred = ((self.y_pred_train > self.__best_train_thr)*1)
         test_pred = ((self.y_pred_test > self.__best_test_thr)*1)
 
-        self.__train_res = self.x_train.copy()
+
         self.__train_res['xgb_preds1'] = train_pred
 
-        self.__test_res = self.x_test.copy()
         self.__test_res['xgb_preds1'] = test_pred
 
         return self.__train_res, self.__test_res
+
 
 
     def features_importance(self, bst):
