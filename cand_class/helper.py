@@ -80,24 +80,6 @@ def AMS(y_true, y_predict, y_true1, y_predict1, output_path):
     S0_best_threshold1 = (thresholds[xi1])
 
 
-    fig, ax = plt.subplots(figsize=(5, 4), dpi = 100)
-    plt.plot(fpr, tpr, linewidth=3 ,linestyle=':',color='darkorange',label='ROC curve train (area = %0.6f)' % roc_auc)
-    plt.plot(fpr1, tpr1, color='green',label='ROC curve test (area = %0.6f)' % roc_auc1)
-    plt.plot([0, 1], [0, 1], color='navy', linestyle='--', label='Random guess')
-    #plt.scatter(fpr[xi], tpr[xi], marker='o', color='black', label= 'Best Threshold train set = '+"%.4f" % S0_best_threshold +'\n AMS = '+ "%.2f" % S0[xi])
-    plt.scatter(fpr1[xi1], tpr1[xi1], marker='o', s=80, color='blue', label= 'Best Threshold test set = '+"%.4f" % S0_best_threshold1 +'\n AMS = '+ "%.2f" % S01[xi1])
-    plt.xlabel('False Positive Rate', fontsize = 10)
-    plt.ylabel('True Positive Rate', fontsize = 10)
-    plt.legend(loc="lower right", fontsize = 8)
-    plt.title('Receiver operating characteristic', fontsize = 13)
-    ax.tick_params(axis='both', which='major', labelsize=10)
-    plt.xlim([-0.01, 1.0])
-    plt.ylim([0, 1.02])
-    #axs.axis([-0.01, 1, 0.9, 1])
-    fig.tight_layout()
-    fig.savefig(str(output_path)+'/hists.png')
-    plt.show()
-
     roc_curve_data = dict()
     roc_curve_data["fpr_train"] = fpr
     roc_curve_data["tpr_train"] = tpr
